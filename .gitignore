@@ -1,0 +1,33 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.env
+
+# Virtual environment
+virtualenv/
+virt/
+v_env/
+env/
+venv/
+
+# Editors
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Database
+*.sqlite3
+*.db
+
+# Uploaded files (mock cloud storage)
+uploads/
