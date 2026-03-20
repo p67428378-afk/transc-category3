@@ -1,39 +1,53 @@
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from database.database import SessionLocal, engine, Base, get_db
-from database.models import Transaction
-from etl.pipeline import run_etl_pipeline
-from pydantic import BaseModel
+import pandas as pd
+import io
+import os
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+from backend.database.database import SessionLocal, init_db, Transaction
+from backend.etl.pipeline import process_csv
 
 app = FastAPI()
 
-class TransactionResponse(BaseModel):
-    id: int
-    transaction_id: str
-    date: str
-    description: str
-    amount: float
-    category: str
+# Initialize database on startup
+@app.on_event("startup")
+def on_startup():
+    init_db()
 
-    class Config:
-        from_attributes = True
+# Dependency to get DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 @app.post("/api/transactions/upload")
 async def upload_transactions(file: UploadFile = File(...), db: Session = Depends(get_db)):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files are allowed")
+
     try:
         contents = await file.read()
-        run_etl_pipeline(contents, db)
-        return {"message": "Transactions uploaded and processed successfully"}
+        # For now, we'll save it to a temporary in-memory file or local disk
+        # In a real scenario, this would go to Cloud Storage (e.g., GCS/S3)
+        temp_file_path = f"/tmp/{file.filename}"
+        with open(temp_file_path, "wb") as f:
+            f.write(contents)
+        
+        # Process the CSV using the ETL pipeline
+        # Assuming a user_id for now, can be extracted from auth in future
+        processed_count = process_csv(temp_file_path, user_id="test_user")
+        
+        # Clean up the temporary file
+        os.remove(temp_file_path)
+
+        return {"message": f"Successfully processed {processed_count} transactions.", "filename": file.filename}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing file: {e}")
 
-@app.get("/api/reports/categorized", response_model=List[TransactionResponse])
+@app.get("/api/reports/categorized")
 async def get_categorized_transactions(db: Session = Depends(get_db)):
     transactions = db.query(Transaction).all()
     return transactions
