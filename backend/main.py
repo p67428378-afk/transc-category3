@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
 from pydantic import BaseModel
+import uuid
 
 from backend.database import get_db, init_db
 from backend.models import Base, Transaction
@@ -14,7 +15,7 @@ app = FastAPI()
 # For production, init_db() should be called explicitly, e.g., via a separate script or migration.
 
 class TransactionResponse(BaseModel):
-    transaction_id: str
+    transaction_id: uuid.UUID
     date: datetime
     description: str
     amount: float
