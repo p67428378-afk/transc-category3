@@ -7,8 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from .database import Base, get_db
-from .main import app
+from backend.database.database import Base, get_db
+from backend.api.main import app
 
 # Single engine for ALL test fixtures — StaticPool ensures one shared connection
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
