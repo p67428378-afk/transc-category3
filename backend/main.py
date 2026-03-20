@@ -4,16 +4,14 @@ from typing import List
 from datetime import datetime
 from pydantic import BaseModel
 
-from backend.database import get_db, init_db, engine
+from backend.database import get_db, init_db
 from backend.models import Base, Transaction
 from backend.etl.pipeline import run_etl_pipeline
 
 app = FastAPI()
 
-# Initialize database on startup
-@app.on_event("startup")
-def on_startup():
-    init_db()
+# Removed @app.on_event("startup") to avoid connecting to real DB during tests.
+# For production, init_db() should be called explicitly, e.g., via a separate script or migration.
 
 class TransactionResponse(BaseModel):
     transaction_id: str
