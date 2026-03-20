@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from backend.models import Transaction
 from backend.llm_service import categorize_transaction
+import asyncio
 
 async def run_etl_pipeline(csv_file_content: str, db: Session):
     # 1. Extract (from CSV)
