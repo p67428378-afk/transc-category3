@@ -4,6 +4,7 @@ from backend.etl.pipeline import run_etl_pipeline
 from backend.models import Transaction
 from datetime import datetime
 import asyncio
+from decimal import Decimal
 
 @pytest.mark.asyncio
 async def test_run_etl_pipeline_success(db_session: Session):
@@ -17,15 +18,15 @@ async def test_run_etl_pipeline_success(db_session: Session):
     
     starbucks = next(t for t in transactions if "Starbucks" in t.description)
     assert starbucks.final_category == "Food"
-    assert starbucks.amount == 5.50
+    assert starbucks.amount == Decimal("5.50")
     
     rent = next(t for t in transactions if "Rent" in t.description)
     assert rent.final_category == "Rent"
-    assert rent.amount == 1200.00
+    assert rent.amount == Decimal("1200.00")
 
     electricity = next(t for t in transactions if "Electricity" in t.description)
     assert electricity.final_category == "Utilities"
-    assert electricity.amount == 75.20
+    assert electricity.amount == Decimal("75.20")
 
 @pytest.mark.asyncio
 async def test_run_etl_pipeline_deduplication(db_session: Session):
